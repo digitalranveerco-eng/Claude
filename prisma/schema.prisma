@@ -1,0 +1,286 @@
+// Growth Operator Platform — multi-tenant relational + vector schema.
+// Tenancy: shared-database / shared-schema, discriminated by organizationId and
+// enforced at the DB layer via Row-Level Security (see migrations/001_*).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+// ─────────────────────────  TENANCY & AUTH  ─────────────────────────
+model Organization {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String    @unique
+  plan      Plan      @default(STARTER)
+  status    OrgStatus @default(ACTIVE)
+  createdAt DateTime  @default(now())
+
+  memberships Membership[]
+  communities Community[]
+  courses     Course[]
+  documents   KnowledgeDocument[]
+  sessions    ChatSession[]
+
+  @@index([slug])
+}
+
+enum Plan {
+  STARTER
+  PRO
+  SCALE
+  ENTERPRISE
+}
+
+enum OrgStatus {
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  email          String   @unique
+  hashedPassword String?
+  name           String?
+  avatarUrl      String?
+  createdAt      DateTime @default(now())
+
+  memberships  Membership[]
+  enrollments  Enrollment[]
+  progress     SectionProgress[]
+  chatSessions ChatSession[]
+
+  @@index([email])
+}
+
+// User <-> Org with a role (RBAC join table)
+model Membership {
+  id        String       @id @default(uuid()) @db.Uuid
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String       @db.Uuid
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId     String       @db.Uuid
+  role      Role         @default(STUDENT)
+  createdAt DateTime     @default(now())
+
+  @@unique([userId, orgId]) // one membership per user per org
+  @@index([orgId, role])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  OPERATOR
+  COACH
+  STUDENT
+}
+
+// ─────────────────────────  COMMUNITIES  ─────────────────────────
+model Community {
+  id         String       @id @default(uuid()) @db.Uuid
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId      String       @db.Uuid
+  name       String
+  isPaid     Boolean      @default(false)
+  priceCents Int          @default(0)
+  createdAt  DateTime     @default(now())
+
+  courses Course[]
+
+  @@index([orgId])
+}
+
+// ─────────────────────────  LMS CONTENT  ─────────────────────────
+model Course {
+  id          String       @id @default(uuid()) @db.Uuid
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId       String       @db.Uuid
+  community   Community?   @relation(fields: [communityId], references: [id])
+  communityId String?      @db.Uuid
+  title       String
+  slug        String
+  description String?
+  published   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+
+  modules     Module[]
+  enrollments Enrollment[]
+
+  @@unique([orgId, slug])
+  @@index([orgId, published])
+}
+
+model Module {
+  // "Skill" grouping
+  id       String    @id @default(uuid()) @db.Uuid
+  course   Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String    @db.Uuid
+  title    String
+  position Int
+  sections Section[]
+
+  @@unique([courseId, position])
+  @@index([courseId])
+}
+
+model Section {
+  // the ?section=<uuid> unit
+  id       String      @id @default(uuid()) @db.Uuid
+  module   Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId String      @db.Uuid
+  title    String
+  position Int
+  kind     SectionKind @default(LESSON)
+  body     String?     @db.Text // markdown
+
+  attachments Attachment[]
+  progress    SectionProgress[]
+  agentConfig AgentConfig?
+
+  @@unique([moduleId, position])
+  @@index([moduleId])
+}
+
+enum SectionKind {
+  LESSON
+  INTERACTIVE
+  QUIZ
+  ASSIGNMENT
+}
+
+model Attachment {
+  id         String    @id @default(uuid()) @db.Uuid
+  section    Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId  String    @db.Uuid
+  type       MediaType
+  storageKey String // R2/S3 object key, NOT a public URL
+  bytes      Int?
+  durationS  Int?
+
+  @@index([sectionId])
+}
+
+enum MediaType {
+  VIDEO
+  PDF
+  IMAGE
+  AUDIO
+}
+
+// ─────────────────────────  PROGRESS  ─────────────────────────
+model Enrollment {
+  id          String    @id @default(uuid()) @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String    @db.Uuid
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model SectionProgress {
+  id         String         @id @default(uuid()) @db.Uuid
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String         @db.Uuid
+  section    Section        @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId  String         @db.Uuid
+  status     ProgressStatus @default(NOT_STARTED)
+  percent    Int            @default(0) // 0-100, e.g. video watch %
+  quizScore  Int? // last quiz score, 0-100
+  lastSeenAt DateTime       @default(now())
+
+  @@unique([userId, sectionId])
+  @@index([userId, status])
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+// ─────────────────────────  AI / RAG / CHAT  ─────────────────────────
+model AgentConfig {
+  id            String   @id @default(uuid()) @db.Uuid
+  section       Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId     String   @unique @db.Uuid
+  persona       String // e.g. "copywriting_mentor"
+  systemPrompt  String   @db.Text
+  model         String   @default("claude-sonnet-4-6")
+  temperature   Float    @default(0.4)
+  knowledgeTags String[] // which knowledge tags this agent may retrieve from
+}
+
+model KnowledgeDocument {
+  id        String       @id @default(uuid()) @db.Uuid
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId     String       @db.Uuid
+  title     String
+  source    String?
+  tags      String[]
+  createdAt DateTime     @default(now())
+
+  chunks KnowledgeChunk[]
+
+  @@index([orgId])
+}
+
+model KnowledgeChunk {
+  id         String              @id @default(uuid()) @db.Uuid
+  document   KnowledgeDocument   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String              @db.Uuid
+  orgId      String              @db.Uuid // denormalized for RLS + filtered ANN
+  content    String              @db.Text
+  tokenCount Int
+  embedding  Unsupported("vector(1024)") // voyage-3 = 1024 dims
+  tags       String[]
+
+  @@index([orgId])
+}
+
+model ChatSession {
+  id        String       @id @default(uuid()) @db.Uuid
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId     String       @db.Uuid
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String       @db.Uuid
+  sectionId String?      @db.Uuid
+  createdAt DateTime     @default(now())
+
+  messages ChatMessage[]
+
+  @@index([orgId, userId])
+}
+
+model ChatMessage {
+  id           String      @id @default(uuid()) @db.Uuid
+  session      ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId    String      @db.Uuid
+  role         MsgRole
+  content      String      @db.Text
+  inputTokens  Int         @default(0) // token accounting per turn (cost + billing)
+  outputTokens Int         @default(0)
+  model        String?
+  // contextual tags linked back to the section that produced this turn
+  contextTags  String[]
+  sectionId    String?     @db.Uuid
+  createdAt    DateTime    @default(now())
+
+  @@index([sessionId, createdAt])
+}
+
+enum MsgRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+}
