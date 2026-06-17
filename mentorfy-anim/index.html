@@ -5,132 +5,151 @@
     <meta name="viewport" content="width=1920, height=1080" />
     <script src="./gsap.min.js"></script>
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body {
-        width: 1920px; height: 1080px; overflow: hidden;
-        background: #02100B;
-        font-family: "Inter", system-ui, sans-serif;
-        -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
-      }
-      :root {
-        --ink: #02100B;
-        --emerald: #13E2A0;
-        --glass: rgba(15, 32, 26, 0.72);
-        --hair: rgba(255,255,255,0.08);
-        --text: #FFFFFF;
-        --dim: rgba(255,255,255,0.66);
-        --dim2: rgba(255,255,255,0.44);
-      }
-      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--ink); }
+      /* ===== Emerald Glass — vendored fonts (offline, render-safe) ===== */
+      @font-face { font-family: "Geist"; src: url("fonts/geist-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Geist"; src: url("fonts/geist-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "Geist"; src: url("fonts/geist-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: block; }
+      @font-face { font-family: "Hanken Grotesk"; src: url("fonts/hanken-grotesk-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "Hanken Grotesk"; src: url("fonts/hanken-grotesk-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
+      @font-face { font-family: "Hanken Grotesk"; src: url("fonts/hanken-grotesk-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: block; }
+      @font-face { font-family: "JetBrains Mono"; src: url("fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: block; }
+      @font-face { font-family: "JetBrains Mono"; src: url("fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: block; }
 
-      /* ---------------- Cinematic background ---------------- */
-      .bg-base { position: absolute; inset: 0; z-index: 0;
-        background: radial-gradient(125% 115% at 50% 120%, #0B5E47 0%, #06382A 32%, #04201A 58%, #02100B 84%); }
-      .bg-aura { position: absolute; left: 50%; top: 54%; width: 1180px; height: 1180px; transform: translate(-50%,-50%);
-        z-index: 1; border-radius: 50%; filter: blur(60px);
-        background: radial-gradient(50% 50% at 50% 50%, rgba(19,226,160,0.28) 0%, rgba(19,226,160,0) 70%); }
-      .rings { position: absolute; left: 50%; top: 54%; transform: translate(-50%,-50%); z-index: 1; opacity: 0.32; }
-      .rings circle { fill: none; stroke: rgba(255,255,255,0.10); stroke-width: 1; }
-      .pt { position: absolute; width: 6px; height: 6px; border-radius: 50%; z-index: 2;
-        background: rgba(19,226,160,0.85); box-shadow: 0 0 10px 2px rgba(19,226,160,0.45); }
-      .grain { position: absolute; inset: 0; z-index: 30; pointer-events: none; opacity: 0.05; mix-blend-mode: overlay;
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --obsidian: #050B07; --forest: #0B2A22; --pine: #103E32;
+        --emerald: #15937B; --jade: #1DB983; --jade-hi: #2FD698; --bloom: #6FE9C0; --mist: #C9F4E6;
+        --text: #F2FBF7; --text-2: #B3DED4; --text-3: #7FA89C;
+        --font-display: "Geist", "Helvetica Neue", sans-serif;
+        --font-body: "Hanken Grotesk", -apple-system, sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, monospace;
+        --glass-edge: rgba(255,255,255,0.32);
+      }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--obsidian);
+        font-family: "Hanken Grotesk", sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--obsidian); }
+
+      /* ---------------- Atmosphere: directional mesh glow (bright lower-left) ---------------- */
+      .bg-base { position: absolute; inset: 0; z-index: 0; background-color: var(--obsidian);
+        background-image:
+          radial-gradient(92% 82% at 12% 112%, rgba(47,214,152,0.42) 0%, rgba(21,147,123,0.20) 32%, rgba(5,11,7,0) 66%),
+          radial-gradient(70% 72% at 80% 118%, rgba(29,185,131,0.24) 0%, rgba(5,11,7,0) 60%),
+          radial-gradient(58% 80% at 102% 42%, rgba(21,147,123,0.15) 0%, rgba(5,11,7,0) 60%),
+          radial-gradient(120% 95% at 50% -16%, rgba(5,11,7,0.72) 0%, rgba(5,11,7,0) 55%); }
+      .bg-aura { position: absolute; left: 50%; top: 56%; width: 1180px; height: 1180px; transform: translate(-50%,-50%);
+        z-index: 1; border-radius: 50%;
+        background: radial-gradient(50% 50% at 50% 50%, rgba(111,233,192,0.20) 0%, rgba(29,185,131,0.06) 46%, rgba(29,185,131,0) 72%); }
+      .rings { position: absolute; left: 50%; top: 56%; transform: translate(-50%,-50%); z-index: 1; opacity: 0.28; }
+      .rings circle { fill: none; stroke: rgba(201,244,230,0.10); stroke-width: 1; }
+      .pt { position: absolute; width: 5px; height: 5px; border-radius: 50%; z-index: 2;
+        background: rgba(111,233,192,0.85); box-shadow: 0 0 10px 2px rgba(29,185,131,0.45); }
+      .grain { position: absolute; inset: 0; z-index: 30; pointer-events: none; opacity: 0.045; mix-blend-mode: overlay;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
       .vignette { position: absolute; inset: 0; z-index: 29; pointer-events: none;
-        background: radial-gradient(80% 80% at 50% 46%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.64) 100%); }
+        background: radial-gradient(82% 82% at 50% 46%, rgba(5,11,7,0) 42%, rgba(5,11,7,0.58) 100%); }
 
       .scene { position: absolute; inset: 0; }
       #scene-hook { z-index: 6; }
       #scene-device { z-index: 5; opacity: 0; }
       #scene-payoff { z-index: 7; opacity: 0; }
 
+      /* ---------------- Glass primitive (FAKED frost — no backdrop-filter, render-fast) ----------------
+         A milky dark fill + sheen gradient + the gradient rim reads as frosted glass over the dark
+         screen, with zero live blur (backdrop-filter is the #1 video-render killer). */
+      .glass { position: relative;
+        background: linear-gradient(135deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.035) 100%), rgba(16,40,33,0.62);
+        border: 1px solid rgba(255,255,255,0.07);
+        box-shadow: inset 0 1px 0 var(--glass-edge), inset 0 -1px 0 rgba(0,0,0,0.12), 0 16px 50px rgba(0,0,0,0.34); }
+      .glass::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+        background: linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 38%, rgba(255,255,255,0.02) 72%);
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor; mask-composite: exclude; }
+
       /* ---------------- Scene 1 : hook ---------------- */
-      .hook-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center;
-        padding: 0 170px; gap: 30px; }
-      .hook-time { font-size: 27px; letter-spacing: 0.30em; text-transform: uppercase; color: var(--emerald); font-weight: 600; }
-      .hook-line { font-size: 104px; font-weight: 600; color: #fff; letter-spacing: -0.03em; line-height: 1.12; }
+      .hook-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 175px; gap: 30px; }
+      .eyebrow { font-family: "JetBrains Mono", monospace; font-size: 25px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+        color: var(--jade); display: flex; align-items: center; gap: 16px; }
+      .eyebrow::before { content: ""; width: 40px; height: 1px; background: var(--jade); }
+      .hook-line { font-family: "Geist", sans-serif; font-size: 108px; font-weight: 500; color: var(--text); letter-spacing: -0.035em; line-height: 1.08; }
       .hook-line .reveal { display: inline-block; }
-      .hook-sub { font-size: 52px; font-weight: 500; color: var(--dim); letter-spacing: -0.01em; line-height: 1.22; }
+      .hook-line .em { color: var(--jade); }
+      .hook-sub { font-family: "Hanken Grotesk", sans-serif; font-size: 50px; font-weight: 400; color: var(--text-2); letter-spacing: -0.01em; line-height: 1.22; }
       .hook-sub .reveal { display: inline-block; }
-      .em { color: var(--emerald); }
 
       /* ---------------- Phone device ---------------- */
       .phone-stage { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; }
-      .phone {
-        position: relative; width: 524px; height: 1044px; border-radius: 62px; padding: 15px;
-        background: linear-gradient(155deg, #1c2a25 0%, #0b1410 46%, #05100c 100%);
+      .phone { position: relative; width: 524px; height: 1044px; border-radius: 62px; padding: 15px;
+        background: linear-gradient(155deg, #16261F 0%, #0A1712 46%, #050F0B 100%);
         box-shadow: 0 60px 130px rgba(0,0,0,0.62), 0 10px 40px rgba(0,0,0,0.5),
-          inset 0 0 0 1.5px rgba(255,255,255,0.06), inset 0 1px 1px rgba(255,255,255,0.18); }
+          inset 0 0 0 1.5px rgba(255,255,255,0.06), inset 0 1px 1px rgba(255,255,255,0.16); }
       .phone::before { content: ""; position: absolute; inset: 0; border-radius: 62px; padding: 1.5px; pointer-events: none;
-        background: linear-gradient(150deg, rgba(19,226,160,0.55), rgba(19,226,160,0) 38%, rgba(19,226,160,0) 70%, rgba(19,226,160,0.30));
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor; mask-composite: exclude; }
+        background: linear-gradient(150deg, rgba(47,214,152,0.55), rgba(29,185,131,0) 38%, rgba(29,185,131,0) 70%, rgba(29,185,131,0.30));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
       .screen { position: relative; width: 100%; height: 100%; border-radius: 48px; overflow: hidden;
-        background: linear-gradient(180deg, #07171130 0%, #061511 100%), #05130E; display: flex; flex-direction: column; }
+        background: linear-gradient(180deg, #08191330 0%, #061712 100%), #061511; display: flex; flex-direction: column; }
       .screen-reflect { position: absolute; inset: 0; z-index: 20; pointer-events: none;
-        background: linear-gradient(125deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 26%, rgba(255,255,255,0) 100%); }
+        background: linear-gradient(125deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0) 26%, rgba(255,255,255,0) 100%); }
 
       .status { height: 50px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 38px 0 40px; }
-      .status .time { font-size: 24px; font-weight: 600; color: #fff; letter-spacing: 0.02em; }
+      .status .time { font-family: "JetBrains Mono", monospace; font-size: 22px; font-weight: 500; color: var(--text); letter-spacing: 0.02em; }
       .status .sys { display: flex; align-items: center; gap: 8px; }
-      .status .sys i { display: block; background: #fff; border-radius: 2px; opacity: 0.92; }
+      .status .sys i { display: block; background: var(--text); border-radius: 2px; opacity: 0.9; }
       .bar1 { width: 5px; height: 9px; } .bar2 { width: 5px; height: 13px; } .bar3 { width: 5px; height: 17px; }
-      .batt { width: 26px; height: 13px; border: 2px solid rgba(255,255,255,0.85); border-radius: 4px; position: relative; opacity: 0.92; margin-left: 6px; }
-      .batt::after { content: ""; position: absolute; left: 2px; top: 2px; bottom: 2px; width: 16px; background: #fff; border-radius: 1px; }
+      .batt { width: 26px; height: 13px; border: 2px solid rgba(242,251,247,0.8); border-radius: 4px; position: relative; opacity: 0.9; margin-left: 6px; }
+      .batt::after { content: ""; position: absolute; left: 2px; top: 2px; bottom: 2px; width: 16px; background: var(--text); border-radius: 1px; }
 
-      .hdr { height: 104px; flex: none; display: flex; align-items: center; gap: 18px; padding: 0 26px; border-bottom: 1px solid var(--hair); }
-      .chev { width: 14px; height: 14px; border-left: 3px solid var(--dim); border-bottom: 3px solid var(--dim); transform: rotate(45deg); margin-right: 4px; flex: none; }
+      .hdr { height: 104px; flex: none; display: flex; align-items: center; gap: 18px; padding: 0 26px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+      .chev { width: 14px; height: 14px; border-left: 3px solid var(--text-3); border-bottom: 3px solid var(--text-3); transform: rotate(45deg); margin-right: 4px; flex: none; }
       .avatar { width: 64px; height: 64px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
-        font-size: 26px; font-weight: 700; color: #EAFFF8; letter-spacing: 0.01em;
-        background: radial-gradient(120% 120% at 30% 20%, #15473A 0%, #0B241C 100%);
-        border: 1.5px solid rgba(19,226,160,0.55); box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.12); }
+        font-family: "Geist", sans-serif; font-size: 25px; font-weight: 600; color: var(--mist); letter-spacing: 0.01em;
+        background: radial-gradient(120% 120% at 30% 20%, #1A5142 0%, #0A211A 100%);
+        border: 1.5px solid rgba(29,185,131,0.55); box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.12); }
       .hdr-meta { display: flex; flex-direction: column; gap: 5px; }
-      .hdr-name { font-size: 31px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+      .hdr-name { font-family: "Geist", sans-serif; font-size: 30px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
       .presence { display: flex; align-items: center; gap: 9px; }
-      .presence .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 9px 1px rgba(19,226,160,0.8); }
-      .presence span { font-size: 21px; color: var(--dim); font-weight: 500; }
+      .presence .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--jade); box-shadow: 0 0 9px 1px rgba(29,185,131,0.85); }
+      .presence span { font-size: 21px; color: var(--text-3); font-weight: 400; }
 
       .thread { flex: 1; padding: 22px 26px 8px; display: flex; flex-direction: column; gap: 18px; overflow: hidden; }
-      .daystamp { align-self: center; font-size: 19px; color: var(--dim); font-weight: 500; margin-bottom: 2px; }
+      .daystamp { align-self: center; font-family: "JetBrains Mono", monospace; font-size: 17px; letter-spacing: 0.08em; color: var(--text-3); font-weight: 400; margin-bottom: 2px; }
       .row { display: flex; align-items: flex-end; gap: 14px; }
       .row.me { justify-content: flex-end; }
       .row.them { justify-content: flex-start; }
       .b-av { width: 44px; height: 44px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
-        font-size: 17px; font-weight: 700; color: #EAFFF8; background: radial-gradient(120% 120% at 30% 20%, #15473A 0%, #0B241C 100%);
-        border: 1.5px solid rgba(19,226,160,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-      .bubble { max-width: 358px; padding: 16px 21px; font-size: 25px; line-height: 1.38; color: #fff; font-weight: 500; box-shadow: 0 10px 26px rgba(0,0,0,0.40); }
-      .bubble.me { background: linear-gradient(160deg, #0E8A66 0%, #0A6147 100%); border-radius: 28px 28px 9px 28px; }
-      .bubble.them { background: rgba(20,40,33,0.92); border: 1px solid rgba(255,255,255,0.06); border-radius: 28px 28px 28px 9px; backdrop-filter: blur(8px); }
-      .row .bubble, .row .b-av { opacity: 0; }   /* revealed by timeline */
+        font-family: "Geist", sans-serif; font-size: 16px; font-weight: 600; color: var(--mist);
+        background: radial-gradient(120% 120% at 30% 20%, #1A5142 0%, #0A211A 100%);
+        border: 1.5px solid rgba(29,185,131,0.5); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+      .bubble { max-width: 358px; padding: 16px 21px; font-family: "Hanken Grotesk", sans-serif; font-size: 25px; line-height: 1.40; color: var(--text); font-weight: 400; }
+      .bubble.me { background: linear-gradient(160deg, #0F7361 0%, #0A4C3E 100%); border-radius: 28px 28px 9px 28px; box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+      .bubble.them { border-radius: 28px 28px 28px 9px; }   /* .glass adds frost + rim */
+      .row .bubble, .row .b-av { opacity: 0; }
 
-      .composer { height: 92px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 22px; border-top: 1px solid var(--hair); }
-      .field { flex: 1; height: 56px; border-radius: 28px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08);
-        display: flex; align-items: center; padding: 0 26px; font-size: 25px; color: var(--dim2); }
+      .composer { height: 92px; flex: none; display: flex; align-items: center; gap: 16px; padding: 0 22px; border-top: 1px solid rgba(255,255,255,0.07); }
+      .field { flex: 1; height: 56px; border-radius: 28px; display: flex; align-items: center; padding: 0 26px; font-size: 24px; color: var(--text-3); }
       .send { width: 56px; height: 56px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
-        background: linear-gradient(150deg, #2BF5B4, #0F9E76); box-shadow: 0 6px 16px rgba(13,150,110,0.55); }
-      .home-ind { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); width: 150px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.55); z-index: 21; }
+        background: var(--jade); box-shadow: 0 8px 22px rgba(29,185,131,0.45); }
+      .home-ind { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); width: 150px; height: 6px; border-radius: 3px; background: rgba(242,251,247,0.5); z-index: 21; }
 
       /* ---------------- Scene 4 : payoff ---------------- */
-      .payoff-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 72px; }
-      .payoff-line { font-size: 90px; font-weight: 600; color: #fff; text-align: center; letter-spacing: -0.025em; max-width: 1340px; line-height: 1.05; }
+      .payoff-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 74px; }
+      .payoff-line { font-family: "Geist", sans-serif; font-size: 92px; font-weight: 500; color: var(--text); text-align: center; letter-spacing: -0.03em; max-width: 1360px; line-height: 1.04; }
       .payoff-line .w { display: inline-block; }
       .lockup { display: flex; flex-direction: column; align-items: center; gap: 24px; }
-      .wordmark { font-size: 70px; font-weight: 800; letter-spacing: -0.03em; color: #fff; }
-      .wordmark .em { color: var(--emerald); }
-      .sig-divider { width: 70px; height: 3px; background: var(--emerald); border-radius: 2px; transform-origin: center; box-shadow: 0 0 12px rgba(19,226,160,0.6); }
-      .signature { font-size: 36px; color: var(--dim); font-weight: 500; letter-spacing: 0.01em; }
-      .logo-note { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); font-size: 19px; color: rgba(255,255,255,0.30); letter-spacing: 0.05em; }
+      .wordmark { font-family: "Geist", sans-serif; font-size: 72px; font-weight: 600; letter-spacing: -0.035em; color: var(--text); }
+      .wordmark .em { color: var(--jade); }
+      .sig-divider { width: 64px; height: 3px; background: var(--jade); border-radius: 2px; transform-origin: center; box-shadow: 0 0 12px rgba(29,185,131,0.6); }
+      .signature { font-family: "Hanken Grotesk", sans-serif; font-size: 35px; color: var(--text-2); font-weight: 400; letter-spacing: 0.005em; }
     </style>
   </head>
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="19" data-width="1920" data-height="1080">
 
-      <!-- background -->
       <div class="bg-base"></div>
       <div class="bg-aura"></div>
       <svg class="rings" width="1320" height="1320" viewBox="0 0 1320 1320">
         <circle cx="660" cy="660" r="300" /><circle cx="660" cy="660" r="450" /><circle cx="660" cy="660" r="600" />
       </svg>
-      <div class="pt" style="left:280px; top:300px"></div>
+      <div class="pt" style="left:300px; top:300px"></div>
       <div class="pt" style="left:1600px; top:262px"></div>
       <div class="pt" style="left:1505px; top:820px"></div>
       <div class="pt" style="left:360px; top:792px"></div>
@@ -139,7 +158,7 @@
       <!-- ===== Scene 1 : hook ===== -->
       <div id="scene-hook" class="scene" data-layout-allow-overlap>
         <div class="hook-wrap">
-          <div class="hook-time">1:47 am</div>
+          <div class="eyebrow">1:47 am</div>
           <div class="hook-line" id="hk1" data-layout-allow-overflow><span class="reveal">you're <span class="em">stuck</span>.</span></div>
           <div class="hook-sub" id="hk2" data-layout-allow-overflow><span class="reveal">and your next call is days away.</span></div>
         </div>
@@ -169,12 +188,12 @@
                 </div>
                 <div class="row them">
                   <div class="b-av">SL</div>
-                  <div class="bubble them">ok first, breathe. you're closer than you think. i went back through what you sent me and your offer is actually good, people just aren't feeling it yet. real quick, when you reach out does it feel like selling or like helping?</div>
+                  <div class="bubble them glass">ok first, breathe. you're closer than you think. i went back through what you sent me and your offer is actually good, people just aren't feeling it yet. real quick, when you reach out does it feel like selling or like helping?</div>
                 </div>
               </div>
               <div class="composer">
-                <div class="field">Message</div>
-                <div class="send"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 19 L12 6 M6 11 L12 5 L18 11" stroke="#062018" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="field glass">Message</div>
+                <div class="send"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 19 L12 6 M6 11 L12 5 L18 11" stroke="#04140D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
               </div>
               <div class="home-ind"></div>
               <div class="screen-reflect"></div>
@@ -216,41 +235,33 @@
       });
 
       /* ---------- Scene 1 — hook (0–4s) ---------- */
-      tl.fromTo(".hook-time", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 0.3);
+      tl.fromTo(".eyebrow", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 0.3);
       tl.fromTo("#hk1 .reveal", { y: 62, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, ease: "expo.out" }, 0.6);
       tl.fromTo("#hk2 .reveal", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.95, ease: "expo.out" }, 1.55);
       tl.to(".hook-wrap", { y: -16, duration: 3.0, ease: "sine.inOut" }, 0.9);
-      // crossfade hook -> device
       tl.to("#scene-hook", { opacity: 0, duration: 0.6, ease: "power2.inOut" }, 3.5);
       tl.to("#scene-device", { opacity: 1, duration: 0.7, ease: "power2.inOut" }, 3.6);
 
       /* ---------- Scene 2 — mentor + question (4–9s) ---------- */
-      // camera pushes into the phone (DOF: blur -> sharp)
-      tl.fromTo(".phone", { scale: 1.12, y: 40, opacity: 0, filter: "blur(18px)" },
-        { scale: 1, y: 0, opacity: 1, filter: "blur(0px)", duration: 1.1, ease: "power3.out" }, 3.9);
-      // slow continuous push for life (on the stage, not the phone — no transform conflict)
+      tl.fromTo(".phone", { scale: 1.12, y: 40, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 1.1, ease: "power3.out" }, 3.9);
       tl.to(".phone-stage", { scale: 1.045, duration: 10.5, ease: "sine.inOut" }, 5.0);
-      // student's message lands (spring)
       tl.fromTo(".bubble.me", { y: 54, opacity: 0, scale: 0.95 }, { y: 0, opacity: 1, scale: 1, duration: 0.75, ease: "back.out(1.5)" }, 5.5);
-      // the wait — presence breathes (no typing dots)
       tl.to(".presence .dot", { scale: 1.5, opacity: 0.55, duration: 0.7, yoyo: true, repeat: 3, ease: "sine.inOut" }, 7.3);
 
       /* ---------- Scene 3 — the guidance (9.7–15s) ---------- */
       tl.fromTo(".b-av", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2)" }, 9.7);
       tl.fromTo(".bubble.them", { y: 56, opacity: 0, scale: 0.95 }, { y: 0, opacity: 1, scale: 1, duration: 0.85, ease: "back.out(1.4)" }, 9.85);
-      // subtle "this lands" breath on the reply
       tl.to(".bubble.them", { scale: 1.015, duration: 0.9, yoyo: true, repeat: 1, ease: "sine.inOut" }, 12.4);
 
       /* ---------- Scene 4 — payoff (15–19s) ---------- */
-      // phone recedes (this recede IS the transition into the final scene)
-      tl.to(".phone", { scale: 0.9, opacity: 0, filter: "blur(10px)", y: -24, duration: 0.7, ease: "power2.in" }, 15.0);
+      tl.to(".phone", { scale: 0.9, opacity: 0, y: -24, duration: 0.7, ease: "power2.in" }, 15.0);
       tl.to("#scene-device", { opacity: 0, duration: 0.55, ease: "power2.inOut" }, 15.25);
       tl.to("#scene-payoff", { opacity: 1, duration: 0.7, ease: "power2.inOut" }, 15.3);
-      tl.fromTo("#pay-line .w", { yPercent: 115, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.7, ease: "expo.out", stagger: 0.08 }, 15.7);
+      tl.fromTo("#pay-line .w", { y: 56, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "expo.out", stagger: 0.08 }, 15.7);
       tl.fromTo(".wordmark", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 17.3);
       tl.fromTo(".sig-divider", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.5, ease: "power2.out" }, 17.6);
       tl.fromTo(".signature", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power2.out" }, 17.75);
-      // gentle final breath
       tl.to(".lockup", { y: -8, duration: 1.0, ease: "sine.inOut" }, 18.0);
 
       window.__timelines["main"] = tl;

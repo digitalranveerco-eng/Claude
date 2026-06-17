@@ -9,6 +9,9 @@
     "publish": "npx --yes hyperframes@0.6.104 publish"
   },
   "dependencies": {
+    "@fontsource/geist-sans": "^5.2.5",
+    "@fontsource/hanken-grotesk": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "gsap": "^3.14.2"
   }
 }
