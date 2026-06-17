@@ -1,0 +1,17 @@
+{
+  "name": "mentorfy-anim",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.6.104 preview",
+    "check": "npx --yes hyperframes@0.6.104 lint && npx --yes hyperframes@0.6.104 validate && npx --yes hyperframes@0.6.104 inspect",
+    "render": "npx --yes hyperframes@0.6.104 render",
+    "publish": "npx --yes hyperframes@0.6.104 publish"
+  },
+  "dependencies": {
+    "@fontsource/geist-sans": "^5.2.5",
+    "@fontsource/hanken-grotesk": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "gsap": "^3.14.2"
+  }
+}
