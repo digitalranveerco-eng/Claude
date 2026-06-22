@@ -2,36 +2,46 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Current state
+## Project
 
-This repository is currently **empty** — it contains no source code, configuration, or
-documentation yet (this file is the first commit). The sections below are a scaffold.
-Fill them in once the project's code, build tooling, and structure exist, and remove this
-notice when the repository is no longer empty.
+This repository hosts the **MENTORFY** marketing landing page. MENTORFY is an AI platform that
+clones a creator's knowledge into a personal AI mentor — one that thinks like the creator (their
+beliefs, thinking patterns, and decision-making), gives every student their own persistent memory,
+and is available 24/7. Creators clone their mentor, manage it from a dashboard, and share private
+mentor links; students log in to access mentors built on creators' knowledge.
 
-> When code is added, regenerate this file by analyzing the actual codebase rather than
-> leaving the placeholders below. Do not document tooling or architecture that is not
-> actually present.
+## Structure
+
+The site is intentionally a **single self-contained file** — there is no build step, framework, or
+package manager.
+
+- `index.html` — the complete landing page. All CSS lives in one `<style>` block and all JS in one
+  `<script>` block at the end of the file. Sections are top-to-bottom: nav, hero (with chat mockup),
+  trusted strip, problem, solution, features, how-it-works, audience split, testimonials, pricing,
+  FAQ, closing CTA, footer.
+- `assets/logo.png` — brand logo, used as-is. Never recreate or redraw the logo.
+- `README.md` — preview and deploy instructions.
 
 ## Commands
 
-_TODO: Document the commonly used commands once tooling is set up, for example:_
-
-- **Build:** _TODO_
-- **Run tests:** _TODO_
-- **Run a single test:** _TODO_
-- **Lint / format:** _TODO_
-- **Run the application locally:** _TODO_
-
-## Architecture
-
-_TODO: Describe the high-level, "big picture" architecture here — the parts that require
-reading multiple files to understand (major modules and how they interact, data flow,
-key abstractions, external dependencies). Skip anything that is obvious from a directory
-listing._
+- **Preview locally:** `python3 -m http.server 8000` then open `http://localhost:8000`
+  (or just open `index.html` in a browser).
+- **Build / tests / lint:** none — this is plain static HTML/CSS/JS.
 
 ## Conventions
 
-_TODO: Capture non-obvious project conventions here — naming patterns, error-handling
-approach, testing strategy, branch/commit conventions, or anything a new contributor
-would otherwise have to discover the hard way._
+- **Design tokens** are CSS custom properties on `:root` in `index.html` (palette, radius, easing).
+  Change colors/spacing there rather than hardcoding values in rules. The brand palette is
+  orange-on-black: gradient `#ff3d00 → #ff6a00 → #ff9d2f` (`--grad`) on a near-black base.
+- **Fonts:** Space Grotesk (headings) + Inter (body), loaded from Google Fonts in `<head>`.
+- **Icons** are inline SVG (no icon library) to keep the file dependency-free.
+- **Animation:** scroll-reveal uses a single IntersectionObserver on `.reveal` elements; honor
+  `prefers-reduced-motion` (already handled in CSS) when adding motion.
+- **No browser storage** and **no backend** — the email form is front-end only (validate + confirm).
+- Keep everything in `index.html`; only split into multiple files if the page genuinely outgrows
+  a single file.
+
+## Branch
+
+Active development branch: `claude/claude-md-docs-BTDWz`. Do not push to other branches without
+explicit permission, and do not open a pull request unless asked.

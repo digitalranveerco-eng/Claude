@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MENTORFY — Clone your mind. Mentor everyone. 24/7.</title>
+<meta name="description" content="MENTORFY turns your knowledge into an AI mentor that thinks exactly like you and remembers every student — personal guidance, around the clock." />
+<link rel="icon" type="image/png" href="assets/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --black:#070707;
+    --bg:#0a0a0b;
+    --surface:#131316;
+    --surface-2:#191920;
+    --border:rgba(255,255,255,.08);
+    --border-strong:rgba(255,255,255,.14);
+    --text:#f6f5f4;
+    --muted:#a4a2a8;
+    --muted-2:#76747c;
+    --o-deep:#ff3d00;
+    --o-1:#ff6a00;
+    --o-2:#ff9d2f;
+    --grad:linear-gradient(120deg,#ff3d00 0%,#ff6a00 45%,#ff9d2f 100%);
+    --grad-soft:linear-gradient(120deg,#ff6a00,#ff9d2f);
+    --glow:rgba(255,106,0,.45);
+    --r:18px;
+    --maxw:1180px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Inter",system-ui,-apple-system,sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(60% 50% at 80% 0%,rgba(255,106,0,.12),transparent 60%),
+      radial-gradient(45% 40% at 0% 25%,rgba(255,61,0,.08),transparent 60%);
+  }
+  /* film grain */
+  body::after{
+    content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:2}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:"Space Grotesk",sans-serif;font-weight:600;line-height:1.08;letter-spacing:-.02em}
+  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--o-2);padding:7px 14px;border:1px solid var(--border-strong);
+    border-radius:100px;background:rgba(255,106,0,.06);
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--grad);box-shadow:0 0 10px var(--glow)}
+  .section{padding:110px 0;position:relative;z-index:2}
+  .section-head{max-width:680px;margin:0 auto 60px;text-align:center}
+  .section-head h2{font-size:clamp(30px,4.5vw,50px);margin:20px 0 16px}
+  .section-head p{color:var(--muted);font-size:18px}
+
+  /* buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font-weight:600;font-size:15px;padding:13px 24px;border-radius:12px;
+    cursor:pointer;border:1px solid transparent;transition:transform .2s var(--ease),box-shadow .25s var(--ease),background .2s;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--grad);color:#1a0c00;box-shadow:0 8px 30px -8px var(--glow)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -8px var(--glow)}
+  .btn-ghost{background:rgba(255,255,255,.04);color:var(--text);border-color:var(--border-strong)}
+  .btn-ghost:hover{background:rgba(255,255,255,.09);transform:translateY(-2px)}
+  .btn svg{width:17px;height:17px}
+
+  /* nav */
+  header{position:fixed;top:0;left:0;right:0;z-index:50;transition:background .3s,border-color .3s,backdrop-filter .3s}
+  header.scrolled{background:rgba(10,10,11,.72);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+  nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:"Space Grotesk";font-weight:700;font-size:19px;letter-spacing:.04em}
+  .brand img{width:38px;height:38px;border-radius:10px;box-shadow:0 4px 18px -4px var(--glow)}
+  .nav-links{display:flex;align-items:center;gap:34px}
+  .nav-links a{color:var(--muted);font-size:15px;font-weight:500;transition:color .2s}
+  .nav-links a:hover{color:var(--text)}
+  .nav-cta{display:flex;align-items:center;gap:14px}
+  .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:0;cursor:pointer;padding:8px}
+  .hamburger span{width:24px;height:2px;background:var(--text);border-radius:2px;transition:.3s}
+
+  /* hero */
+  .hero{padding:170px 0 90px;text-align:center;position:relative;z-index:2}
+  .hero .glow-orb{
+    position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+    width:780px;height:520px;border-radius:50%;z-index:-1;
+    background:radial-gradient(circle,rgba(255,106,0,.30),rgba(255,61,0,.06) 45%,transparent 70%);
+    filter:blur(40px);pointer-events:none;
+  }
+  .hero h1{font-size:clamp(40px,7vw,76px);margin:26px auto 22px;max-width:14ch}
+  .hero p.lead{font-size:clamp(17px,2.2vw,21px);color:var(--muted);max-width:620px;margin:0 auto 36px}
+  .hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .hero-note{margin-top:20px;font-size:13.5px;color:var(--muted-2)}
+
+  /* hero mockup */
+  .mockup{
+    margin:70px auto 0;max-width:880px;position:relative;
+    border:1px solid var(--border-strong);border-radius:20px;
+    background:linear-gradient(180deg,var(--surface),#0c0c0e);
+    box-shadow:0 40px 120px -40px rgba(255,106,0,.30),0 0 0 1px rgba(255,255,255,.02);
+    overflow:hidden;
+  }
+  .mockup-bar{display:flex;align-items:center;gap:7px;padding:14px 18px;border-bottom:1px solid var(--border)}
+  .mockup-bar i{width:11px;height:11px;border-radius:50%;background:#2c2c33;display:block}
+  .mockup-bar .ttl{margin-left:12px;font-size:13px;color:var(--muted-2);font-family:"Space Grotesk"}
+  .chat{padding:26px;display:flex;flex-direction:column;gap:16px;text-align:left}
+  .bubble{max-width:78%;padding:14px 17px;border-radius:16px;font-size:15px;line-height:1.5}
+  .bubble.user{align-self:flex-end;background:rgba(255,255,255,.06);border:1px solid var(--border);border-bottom-right-radius:5px}
+  .bubble.bot{align-self:flex-start;background:var(--grad-soft);color:#1a0c00;border-bottom-left-radius:5px;font-weight:500}
+  .bubble .who{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin-bottom:5px}
+  .mem-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--o-2);background:rgba(255,106,0,.08);border:1px solid var(--border-strong);padding:6px 11px;border-radius:100px}
+  .mem-chip svg{width:13px;height:13px}
+
+  /* trusted */
+  .trusted{padding:54px 0;text-align:center;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .trusted p{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);margin-bottom:26px}
+  .logos{display:flex;flex-wrap:wrap;gap:14px 48px;justify-content:center;align-items:center}
+  .logos span{font-family:"Space Grotesk";font-weight:700;font-size:21px;color:#5a5860;opacity:.8;letter-spacing:.02em;transition:color .2s}
+  .logos span:hover{color:var(--muted)}
+
+  /* cards / grid */
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    padding:30px;transition:transform .3s var(--ease),border-color .3s,background .3s;position:relative;overflow:hidden;
+  }
+  .card:hover{transform:translateY(-5px);border-color:var(--border-strong);background:var(--surface-2)}
+  .ico{
+    width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    background:rgba(255,106,0,.10);border:1px solid var(--border-strong);margin-bottom:20px;
+  }
+  .ico svg{width:23px;height:23px;stroke:var(--o-2)}
+  .card h3{font-size:20px;margin-bottom:10px}
+  .card p{color:var(--muted);font-size:15px}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+
+  /* problem */
+  .problem-cards .card{padding:34px}
+  .problem-cards .tag{font-size:13px;font-weight:700;color:var(--o-2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px;display:block}
+  .problem-cards h3{font-size:24px;margin-bottom:12px}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;counter-reset:step;position:relative}
+  .step{position:relative;padding-top:8px}
+  .step .num{
+    width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-family:"Space Grotesk";font-weight:700;font-size:22px;color:var(--o-2);
+    background:var(--surface);border:1px solid var(--border-strong);margin-bottom:20px;position:relative;z-index:2;
+  }
+  .step h3{font-size:19px;margin-bottom:9px}
+  .step p{color:var(--muted);font-size:14.5px}
+  .steps .line{position:absolute;top:35px;left:7%;right:7%;height:1px;background:linear-gradient(90deg,transparent,var(--border-strong),transparent);z-index:1}
+
+  /* audience split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .split .card{padding:40px}
+  .split h3{font-size:27px;margin-bottom:8px}
+  .split .sub{color:var(--o-2);font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:22px;display:block}
+  .checks{list-style:none;display:flex;flex-direction:column;gap:15px}
+  .checks li{display:flex;gap:13px;color:var(--muted);font-size:15.5px;align-items:flex-start}
+  .checks .ck{flex:none;width:23px;height:23px;border-radius:7px;background:rgba(255,106,0,.12);display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .checks .ck svg{width:13px;height:13px;stroke:var(--o-2)}
+
+  /* testimonials */
+  .quote{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:30px}
+  .quote .stars{color:var(--o-2);font-size:15px;letter-spacing:3px;margin-bottom:16px}
+  .quote p{font-size:16px;margin-bottom:22px;color:#dedce0}
+  .who-row{display:flex;align-items:center;gap:13px}
+  .avatar{width:42px;height:42px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a0c00;font-family:"Space Grotesk"}
+  .who-row b{display:block;font-size:15px}
+  .who-row small{color:var(--muted-2);font-size:13px}
+
+  /* pricing */
+  .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch}
+  .plan{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:34px;display:flex;flex-direction:column}
+  .plan.featured{border-color:transparent;background:linear-gradient(180deg,rgba(255,106,0,.10),var(--surface));position:relative}
+  .plan.featured::before{content:"";position:absolute;inset:0;border-radius:var(--r);padding:1px;background:var(--grad);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  .plan .badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad);color:#1a0c00;font-size:12px;font-weight:700;padding:5px 14px;border-radius:100px;letter-spacing:.04em}
+  .plan h3{font-size:20px;margin-bottom:6px}
+  .plan .desc{color:var(--muted-2);font-size:14px;margin-bottom:20px;min-height:38px}
+  .plan .price{font-family:"Space Grotesk";font-size:44px;font-weight:700;line-height:1}
+  .plan .price small{font-size:15px;color:var(--muted-2);font-weight:500;font-family:"Inter"}
+  .plan .feats{list-style:none;margin:24px 0 28px;display:flex;flex-direction:column;gap:13px;flex:1}
+  .plan .feats li{display:flex;gap:11px;font-size:14.5px;color:var(--muted)}
+  .plan .feats svg{width:18px;height:18px;stroke:var(--o-2);flex:none}
+  .plan .btn{width:100%}
+
+  /* FAQ */
+  .faq{max-width:780px;margin:0 auto}
+  .faq-item{border:1px solid var(--border);border-radius:14px;margin-bottom:14px;background:var(--surface);overflow:hidden;transition:border-color .25s}
+  .faq-item.open{border-color:var(--border-strong)}
+  .faq-q{width:100%;text-align:left;background:none;border:0;color:var(--text);font-size:17px;font-weight:600;font-family:"Space Grotesk";padding:22px 24px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .faq-q .pm{flex:none;width:22px;height:22px;position:relative;transition:transform .3s}
+  .faq-q .pm::before,.faq-q .pm::after{content:"";position:absolute;background:var(--o-2);border-radius:2px}
+  .faq-q .pm::before{top:50%;left:0;right:0;height:2px;transform:translateY(-50%)}
+  .faq-q .pm::after{left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);transition:opacity .3s}
+  .faq-item.open .pm::after{opacity:0}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .35s var(--ease)}
+  .faq-a p{padding:0 24px 22px;color:var(--muted);font-size:15.5px}
+
+  /* CTA band */
+  .cta-band{position:relative;text-align:center;border-radius:28px;padding:70px 30px;overflow:hidden;border:1px solid var(--border-strong);background:linear-gradient(180deg,var(--surface),#0b0b0d)}
+  .cta-band .glow-orb{position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:700px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,0,.28),transparent 65%);filter:blur(30px);z-index:0}
+  .cta-band>*{position:relative;z-index:1}
+  .cta-band h2{font-size:clamp(30px,5vw,52px);margin-bottom:16px}
+  .cta-band p{color:var(--muted);font-size:18px;max-width:520px;margin:0 auto 32px}
+  .signup{display:flex;gap:12px;max-width:480px;margin:0 auto;flex-wrap:wrap}
+  .signup input{flex:1;min-width:220px;background:rgba(255,255,255,.05);border:1px solid var(--border-strong);border-radius:12px;padding:14px 18px;color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s}
+  .signup input:focus{border-color:var(--o-1)}
+  .signup .btn{flex:none}
+  .form-msg{margin-top:16px;font-size:14px;color:var(--o-2);min-height:20px;font-weight:500}
+
+  /* footer */
+  footer{border-top:1px solid var(--border);padding:64px 0 36px;position:relative;z-index:2}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
+  .foot-brand .brand{margin-bottom:16px}
+  .foot-brand p{color:var(--muted-2);font-size:14.5px;max-width:280px}
+  .foot-col h4{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-2);margin-bottom:18px;font-family:"Inter";font-weight:600}
+  .foot-col a{display:block;color:var(--muted);font-size:14.5px;margin-bottom:12px;transition:color .2s}
+  .foot-col a:hover{color:var(--text)}
+  .foot-bot{display:flex;justify-content:space-between;align-items:center;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap;gap:16px}
+  .foot-bot small{color:var(--muted-2);font-size:13.5px}
+  .socials{display:flex;gap:12px}
+  .socials a{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);transition:.2s}
+  .socials a:hover{color:var(--o-2);border-color:var(--border-strong)}
+  .socials svg{width:17px;height:17px}
+
+  /* reveal animation */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* mobile menu */
+  .mobile-menu{display:none;position:fixed;inset:72px 0 auto;z-index:49;background:rgba(10,10,11,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:24px;flex-direction:column;gap:6px}
+  .mobile-menu.open{display:flex}
+  .mobile-menu a{padding:13px 8px;color:var(--muted);font-size:17px;font-weight:500;border-radius:10px}
+  .mobile-menu a:hover{background:rgba(255,255,255,.05);color:var(--text)}
+  .mobile-menu .btn{margin-top:10px}
+
+  @media(max-width:900px){
+    .nav-links,.nav-cta .btn-ghost{display:none}
+    .hamburger{display:flex}
+    .grid-3,.price-grid{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr 1fr}
+    .steps .line{display:none}
+    .split,.grid-2,.problem-cards.grid-2{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .section{padding:80px 0}
+  }
+  @media(max-width:560px){
+    .steps{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr}
+    .hero{padding:140px 0 60px}
+    .chat .bubble{max-width:90%}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    html{scroll-behavior:auto}
+    .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header id="header">
+  <div class="wrap">
+    <nav>
+      <a href="#" class="brand"><img src="assets/logo.png" alt="MENTORFY logo" />MENTORFY</a>
+      <div class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#audience">For creators</a>
+        <a href="#audience">For students</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="nav-cta">
+        <a href="#faq" class="btn btn-ghost">Learn more</a>
+        <a href="#early" class="btn btn-primary">Get early access</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#how">How it works</a>
+  <a href="#features">Features</a>
+  <a href="#audience">For creators</a>
+  <a href="#audience">For students</a>
+  <a href="#pricing">Pricing</a>
+  <a href="#early" class="btn btn-primary">Get early access</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="glow-orb"></div>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>The AI mentor platform for creators</span>
+    <h1>Clone your mind. <span class="grad-text">Mentor everyone.</span> 24/7.</h1>
+    <p class="lead">MENTORFY turns your knowledge into an AI mentor that thinks exactly like you — your beliefs, your frameworks, your decisions — and remembers every student personally, around the clock.</p>
+    <div class="hero-cta">
+      <a href="#early" class="btn btn-primary">Clone your mentor
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="#how" class="btn btn-ghost">See how it works</a>
+    </div>
+    <p class="hero-note">Early access — be one of the first creators to clone their brain.</p>
+
+    <!-- chat mockup -->
+    <div class="mockup reveal">
+      <div class="mockup-bar"><i></i><i></i><i></i><span class="ttl">Your AI Mentor · always on</span></div>
+      <div class="chat">
+        <div class="bubble user"><span class="who">Student</span>I keep putting off launching my course. I've had the outline ready for three months now.</div>
+        <div class="mem-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+          Remembers: you set a launch goal for next month
+        </div>
+        <div class="bubble bot"><span class="who">Mentor · in your voice</span>You don't have a planning problem — you have a fear-of-shipping problem. We talked about this. Pick the smallest version you'd be embarrassed to sell, set a date this week, and tell one person. Momentum beats perfect. Want me to break the next 7 days down with you?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUSTED -->
+<div class="trusted">
+  <div class="wrap">
+    <p>Built for creators &amp; educators scaling real mentorship</p>
+    <div class="logos">
+      <span>Coaches</span><span>Course Creators</span><span>Founders</span><span>Educators</span><span>Communities</span><span>Agencies</span>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="section" id="problem">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>The bottleneck</span>
+      <h2>When you taught 10, you knew every student. Now you have 10,000.</h2>
+      <p>Your impact scaled — but your attention didn't. Weekly calls can't reach everyone, and the students who need you most are often the ones who stay silent.</p>
+    </div>
+    <div class="grid-2 problem-cards">
+      <div class="card reveal">
+        <span class="tag">Problem 01 — The access gap</span>
+        <h3>They want all of you, on demand.</h3>
+        <p>Hundreds of students want one thing: you, whenever they're stuck. But calls get missed, time zones collide, and most are too nervous to raise their hand and ask openly in front of everyone.</p>
+      </div>
+      <div class="card reveal">
+        <span class="tag">Problem 02 — The personalization gap</span>
+        <h3>You can't know every student's life.</h3>
+        <p>You can share your fundamentals and frameworks — but you don't know each student's goals, history, and blockers. So advice stays general, when what they actually need is personal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="section" id="solution" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>The fix</span>
+      <h2>Meet your AI mentor — <span class="grad-text">your entire brain in one bot.</span></h2>
+      <p>MENTORFY clones your knowledge into a single AI mentor that thinks the way you think. A proprietary framework captures your belief system, thinking patterns, and decision-making — so every answer sounds like it came straight from you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features" style="padding-top:0">
+  <div class="wrap">
+    <div class="grid-3">
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 2a4 4 0 0 0-4 4 4 4 0 0 0-2 7 4 4 0 0 0 2 7 4 4 0 0 0 8 0 4 4 0 0 0 2-7 4 4 0 0 0-2-7 4 4 0 0 0-4-4Z"/><path d="M12 6v14"/></svg></div>
+        <h3>Your entire brain in one bot</h3>
+        <p>Your courses, content, and philosophy distilled into one mentor that knows everything you'd teach.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg></div>
+        <h3>Per-student memory</h3>
+        <p>Every student gets their own memory. Your mentor remembers their goals, history, and context — and gets sharper with every conversation.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3.2"/></svg></div>
+        <h3>Thinks exactly like you</h3>
+        <p>Our framework encodes your beliefs, reasoning, and decision patterns — so the guidance is unmistakably yours, not generic AI.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <h3>Available 24/7</h3>
+        <p>No missed calls, no time zones, no waiting room. Your mentor shows up the moment a student needs it — day or night.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div>
+        <h3>Private mentor links</h3>
+        <p>Share a private link to your mentor with your audience, community, or course — fully branded and fully yours.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></div>
+        <h3>Creator dashboard</h3>
+        <p>Manage every mentor, watch real conversations, and refine your clone — all from one custom dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>How it works</span>
+      <h2>From your knowledge to your mentor in four steps</h2>
+      <p>You bring the expertise. MENTORFY builds the mentor.</p>
+    </div>
+    <div class="steps">
+      <div class="line"></div>
+      <div class="step reveal"><div class="num">1</div><h3>Upload your knowledge</h3><p>Drop in your courses, videos, docs, and frameworks — everything you'd teach.</p></div>
+      <div class="step reveal"><div class="num">2</div><h3>We clone your brain</h3><p>MENTORFY builds your AI mentor using our thinking-pattern framework.</p></div>
+      <div class="step reveal"><div class="num">3</div><h3>Get your private link</h3><p>Launch your mentor with a private link, ready for your students.</p></div>
+      <div class="step reveal"><div class="num">4</div><h3>Manage &amp; scale</h3><p>Monitor, improve, and grow — all from your creator dashboard.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCE SPLIT -->
+<section class="section" id="audience" style="padding-top:0">
+  <div class="wrap">
+    <div class="split">
+      <div class="card reveal">
+        <span class="sub">For creators</span>
+        <h3>Scale yourself — without losing yourself.</h3>
+        <ul class="checks" style="margin-top:22px">
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>Clone your brain into an AI mentor that sounds like you</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>Manage every mentor from one custom dashboard</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>Share private mentor links with your audience</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>Keep creating while your mentor handles the rest, 24/7</li>
+        </ul>
+      </div>
+      <div class="card reveal">
+        <span class="sub">For students</span>
+        <h3>A mentor who actually remembers you.</h3>
+        <ul class="checks" style="margin-top:22px">
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>Log in and access mentors built on real creators' knowledge</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>Ask anything, anytime — no nerves, no waiting, no judgment</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>Get personal guidance that remembers your full story</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>Move forward with answers in your mentor's real voice</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" id="testimonials" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Why creators care</span>
+      <h2>Mentorship that finally scales</h2>
+    </div>
+    <div class="grid-3">
+      <div class="quote reveal">
+        <div class="stars">★★★★★</div>
+        <p>"My community went from 'waiting for the weekly call' to getting answers in my voice the second they're stuck. It feels like I cloned myself."</p>
+        <div class="who-row"><div class="avatar">A</div><div><b>Alex Rivera</b><small>Course Creator · 40k students</small></div></div>
+      </div>
+      <div class="quote reveal">
+        <div class="stars">★★★★★</div>
+        <p>"The per-student memory is the magic. It remembers where each person is in their journey — something I could never do at scale."</p>
+        <div class="who-row"><div class="avatar">M</div><div><b>Maya Chen</b><small>Business Coach</small></div></div>
+      </div>
+      <div class="quote reveal">
+        <div class="stars">★★★★★</div>
+        <p>"Students who were too shy to speak on calls now message my mentor every day. Engagement and results both went up."</p>
+        <div class="who-row"><div class="avatar">J</div><div><b>Jordan Blake</b><small>Founder &amp; Educator</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Pricing</span>
+      <h2>Plans that scale with your mentorship</h2>
+      <p>Start free in early access. Indicative pricing below — final plans announced at launch.</p>
+    </div>
+    <div class="price-grid">
+      <div class="plan reveal">
+        <h3>Starter</h3>
+        <p class="desc">Clone your first AI mentor and test it with your community.</p>
+        <div class="price">$0<small> / early access</small></div>
+        <ul class="feats">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>1 AI mentor</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Per-student memory</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>1 private mentor link</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Creator dashboard</li>
+        </ul>
+        <a href="#early" class="btn btn-ghost">Get early access</a>
+      </div>
+      <div class="plan featured reveal">
+        <span class="badge">Most popular</span>
+        <h3>Pro</h3>
+        <p class="desc">For creators ready to give their whole audience a mentor.</p>
+        <div class="price">$49<small> / mo</small></div>
+        <ul class="feats">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Up to 3 AI mentors</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Unlimited students &amp; memory</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Custom-branded private links</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Conversation insights</li>
+        </ul>
+        <a href="#early" class="btn btn-primary">Start with Pro</a>
+      </div>
+      <div class="plan reveal">
+        <h3>Studio</h3>
+        <p class="desc">For teams, academies, and large communities.</p>
+        <div class="price">$199<small> / mo</small></div>
+        <ul class="feats">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Unlimited AI mentors</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Team dashboard &amp; roles</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Priority cloning &amp; support</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>Advanced analytics</li>
+        </ul>
+        <a href="#early" class="btn btn-ghost">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>FAQ</span>
+      <h2>Everything you need to know</h2>
+    </div>
+    <div class="faq">
+      <div class="faq-item"><button class="faq-q">What exactly is MENTORFY?<span class="pm"></span></button><div class="faq-a"><p>MENTORFY is an AI platform that clones a creator's knowledge into a personal AI mentor. It carries your entire teaching brain in one bot, gives every student their own memory, and is available 24/7 — so your audience gets you, on demand.</p></div></div>
+      <div class="faq-item"><button class="faq-q">How does the mentor think like me?<span class="pm"></span></button><div class="faq-a"><p>We use a proprietary framework that captures your belief system, thinking patterns, and decision-making — not just your facts. The result is guidance that reflects how <em>you</em> would actually answer, in your voice.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Does it really remember each student?<span class="pm"></span></button><div class="faq-a"><p>Yes. Every student has their own private memory. Your mentor remembers their goals, history, and context across conversations, so advice keeps getting more personal and more useful over time.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Who builds the mentor — me or MENTORFY?<span class="pm"></span></button><div class="faq-a"><p>MENTORFY builds it on your knowledge. You provide the material; we clone it into your mentor using our framework. You then manage and refine everything from your creator dashboard.</p></div></div>
+      <div class="faq-item"><button class="faq-q">How do students access my mentor?<span class="pm"></span></button><div class="faq-a"><p>You get a private link to share with your audience or community. Students log in to MENTORFY and chat with your mentor directly — anytime, from anywhere.</p></div></div>
+      <div class="faq-item"><button class="faq-q">Is my knowledge private and secure?<span class="pm"></span></button><div class="faq-a"><p>Your knowledge powers only your mentors and stays yours. You control what's uploaded and can manage or remove your content from your dashboard at any time.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section class="section" id="early">
+  <div class="wrap">
+    <div class="cta-band reveal">
+      <div class="glow-orb"></div>
+      <span class="eyebrow"><span class="dot"></span>Early access</span>
+      <h2 style="margin-top:18px">Ready to clone your mind?</h2>
+      <p>Join the early access list and be one of the first creators to launch an AI mentor that scales you — without losing what makes you, you.</p>
+      <form class="signup" id="signupForm">
+        <input type="email" id="email" placeholder="you@example.com" required aria-label="Email address" />
+        <button type="submit" class="btn btn-primary">Request access</button>
+      </form>
+      <div class="form-msg" id="formMsg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="brand"><img src="assets/logo.png" alt="MENTORFY logo" />MENTORFY</a>
+        <p>Clone your mind. Mentor everyone. The AI mentor platform that scales creators, 24/7.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#early">Early access</a>
+      </div>
+      <div class="foot-col">
+        <h4>Use cases</h4>
+        <a href="#audience">For creators</a><a href="#audience">For students</a><a href="#audience">For communities</a><a href="#audience">For coaches</a>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <a href="#faq">FAQ</a><a href="#early">Contact</a><a href="#">Privacy</a><a href="#">Terms</a>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <small>© <span id="year"></span> MENTORFY. All rights reserved.</small>
+      <div class="socials">
+        <a href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 8.5a3 3 0 0 0-2-2C18 6 12 6 12 6s-6 0-8 .5a3 3 0 0 0-2 2C2 10 2 12 2 12s0 2 .5 3.5a3 3 0 0 0 2 2C6 18 12 18 12 18s6 0 8-.5a3 3 0 0 0 2-2C22 14 22 12 22 12s0-2-.5-3.5Z"/><path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // year
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // nav scroll state
+  const header = document.getElementById('header');
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 24);
+  onScroll();
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  // mobile menu
+  const burger = document.getElementById('hamburger');
+  const menu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', () => menu.classList.toggle('open'));
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
+
+  // reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const q = item.querySelector('.faq-q');
+    const a = item.querySelector('.faq-a');
+    q.addEventListener('click', () => {
+      const open = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => { i.classList.remove('open'); i.querySelector('.faq-a').style.maxHeight = null; });
+      if (!open){ item.classList.add('open'); a.style.maxHeight = a.scrollHeight + 'px'; }
+    });
+  });
+
+  // signup (front-end only)
+  const form = document.getElementById('signupForm');
+  const msg = document.getElementById('formMsg');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.style.color = '#ff6a00'; msg.textContent = 'Please enter a valid email address.'; return; }
+    msg.style.color = '#ff9d2f';
+    msg.textContent = "You're on the list — we'll be in touch about early access. 🎉";
+    form.reset();
+  });
+</script>
+</body>
+</html>
